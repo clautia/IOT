@@ -10,8 +10,6 @@ VALUES
     ('Proyecto Logistica 4.0', 'Optimizacion de la cadena de suministro con tecnologia de vanguardia. Seguimiento en tiempo real.', 'Sucursal central, Ciudad de Nueva York'),
     ('Proyecto SaludConectada', 'Transformacion de la atencion medica con dispositivos medicos inteligentes. Telemedicina y salud accesible.', 'Hospital General, Sala de Pacientes');
 
-
-
 ALTER TABLE Microcontroladores
 MODIFY COLUMN idMicrocontroladores INT AUTO_INCREMENT;
 
@@ -24,9 +22,7 @@ VALUES
     ('HealthMonitor 300', 'healthmonitor300.local', 'Monitor de Salud', 'Hospital General, Sala de Pacientes', 5050);
 
 
-
 SELECT * FROM Microcontroladores;
-
 
 ALTER TABLE Proyecto_Micro
 MODIFY COLUMN idProyecto_Micro INT AUTO_INCREMENT;
@@ -38,7 +34,6 @@ VALUES
     (3, 3), -- Asociar Proyecto 3 con Microcontrolador 3
     (4, 4), -- Asociar Proyecto 4 con Microcontrolador 4
     (5, 5); -- Asociar Proyecto 5 con Microcontrolador 5
-
 
 ALTER TABLE SenAct
 MODIFY COLUMN IdSenAct INT AUTO_INCREMENT;
@@ -170,5 +165,127 @@ VALUES
 
 SELECT Nombre, Dis_geografica AS Localizacion
 FROM Proyectos;
+
+ALTER TABLE Datos
+MODIFY COLUMN Datos FLOAT;
+--Mostrar los microcontroladores y actuadores relacionados
+
+SELECT Distinct
+	Microcontroladores.nombre AS Microcontrolador,
+    SenAct.nombre AS Sensor_actuador
+FROM microcontroladores
+JOIN Datos ON datos.id_Micro = microcontroladores.idMicrocontroladores
+JOIN SenAct ON SenAct.idSenAct =datos.id_Sen_Act;
+
+--4.-Mostrar nombres de proyecto, microcontrolador, actuador/sensor y dato.
+------------------------------------------
+SELECT
+    P.Nombre AS NombreProyecto,
+    M.Nombre AS NombreMicrocontrolador,
+    SA.Nombre AS NombreSensorActuador,
+    GROUP_CONCAT(D.Datos ORDER BY D.Fecha ASC SEPARATOR ', ') AS DatosRegistrados
+FROM
+    Proyectos P
+JOIN
+    Proyecto_Micro PM ON P.idProyectos = PM.id_Proyectos
+JOIN
+    Microcontroladores M ON PM.Id_Micro = M.idMicrocontroladores
+JOIN
+    Datos D ON M.idMicrocontroladores = D.id_Micro
+JOIN
+    SenAct SA ON D.Id_Sen_Act = SA.idSenAct
+GROUP BY
+    P.Nombre, M.Nombre, SA.Nombre
+ORDER BY
+    NombreProyecto, NombreMicrocontrolador, NombreSensorActuador;
+
+------AGRUPAR SENSOR CON PROYECTO
+SELECT 
+    P.Nombre AS NombreProyecto,
+    GROUP_CONCAT(SA.Nombre ORDER BY SA.Nombre ASC SEPARATOR ', ') AS Sensores
+FROM
+    Proyectos P
+JOIN
+    Proyecto_Micro PM ON P.idProyectos = PM.id_Proyectos
+JOIN
+    Microcontroladores M ON PM.Id_Micro = M.idMicrocontroladores
+JOIN
+    Datos D ON M.idMicrocontroladores = D.id_Micro
+JOIN
+    SenAct SA ON D.Id_Sen_Act = SA.idSenAct
+GROUP BY
+    P.Nombre
+ORDER BY
+    NombreProyecto;
+
+    ----Valor Maximo, minimo y promedio de el sensor de humedad
+    SELECT
+    P.Nombre AS NombreProyecto,
+    SA.Nombre AS NombreSensor,
+    MAX(D.Datos) AS ValorMaximo,
+    MIN(D.Datos) AS ValorMinimo,
+    AVG(D.Datos) AS ValorPromedio
+FROM
+    Proyectos P
+JOIN
+    Proyecto_Micro PM ON P.idProyectos = PM.id_Proyectos
+JOIN
+    Microcontroladores M ON PM.Id_Micro = M.idMicrocontroladores
+JOIN
+    Datos D ON M.idMicrocontroladores = D.id_Micro
+JOIN
+    SenAct SA ON D.Id_Sen_Act = SA.idSenAct
+WHERE
+    SA.Nombre = 'Sensor de Humedad'
+GROUP BY
+    P.Nombre, SA.Nombre
+ORDER BY
+    NombreProyecto, NombreSensor;
+
+SELECT
+    P.Nombre AS NombreProyecto,
+    SA.Nombre AS NombreSensor,
+    MAX(D.Datos) AS ValorMaximo,
+    MIN(D.Datos) AS ValorMinimo,
+    AVG(D.Datos) AS ValorPromedio
+FROM
+    Proyectos P
+JOIN
+    Proyecto_Micro PM ON P.idProyectos = PM.id_Proyectos
+JOIN
+    Microcontroladores M ON PM.Id_Micro = M.idMicrocontroladores
+JOIN
+    Datos D ON M.idMicrocontroladores = D.id_Micro
+JOIN
+    SenAct SA ON D.Id_Sen_Act = SA.idSenAct
+WHERE
+    SA.Nombre = 'Sensor de Presion'
+GROUP BY
+    P.Nombre, SA.Nombre
+ORDER BY
+    NombreProyecto, NombreSensor;
+
+----Ordenar por Nombre de proyecto, sensor, ubicacion del sensor y datos leidos del sensor
+
+SELECT
+    P.Nombre AS NombreProyecto,
+    SA.Nombre AS NombreSensor,
+    SA.Ubicacion_geografica AS UbicacionGeografica,
+    GROUP_CONCAT(D.Datos ORDER BY D.Fecha ASC SEPARATOR ', ') AS Datos
+FROM
+    Proyectos P
+JOIN
+    Proyecto_Micro PM ON P.idProyectos = PM.id_Proyectos
+JOIN
+    Microcontroladores M ON PM.Id_Micro = M.idMicrocontroladores
+JOIN
+    Datos D ON M.idMicrocontroladores = D.id_Micro
+JOIN
+    SenAct SA ON D.Id_Sen_Act = SA.idSenAct
+GROUP BY
+    NombreProyecto, NombreSensor, UbicacionGeografica
+ORDER BY
+    NombreProyecto, NombreSensor, UbicacionGeografica;
+
 
 
