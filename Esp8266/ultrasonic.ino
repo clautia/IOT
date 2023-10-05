@@ -1,6 +1,6 @@
-#define D6  5 //trigPind d2
-#define D7  4 // echoPin d3
-#define D8  0 //aqui va el led del sensor ultrasónico d1
+#define D2  5 //trigPind d2
+#define D3  4 // echoPin d3
+#define D1  0 //aqui va el led del sensor ultrasónico d1
 
 // ----- Funcion que dispara un rayo, lo apaga y espera el echo
 //       para medir distancia
