@@ -1,15 +1,15 @@
-#define D6  12 //trigPin
-#define D7  13 // echoPin
-#define D8  15 //aqui va el led del sensor ultrasónico
+#define D6  5 //trigPind d2
+#define D7  4 // echoPin d3
+#define D8  0 //aqui va el led del sensor ultrasónico d1
 
 // ----- Funcion que dispara un rayo, lo apaga y espera el echo
 //       para medir distancia
 
 void medirDistanciaCm() {
-  int trigPin = D6;
-  int echoPin = D7;
+  int trigPin = D2;
+  int echoPin = D3;
   float v = 331.5+0.6*20;   // m/
-  int ledSonic = 15;  // Equivale a D8
+  int ledSonic = 5;  // Equivale a D1
   digitalWrite(trigPin, LOW);
   delayMicroseconds(3);
   digitalWrite(trigPin, HIGH);
@@ -36,14 +36,14 @@ void medirDistanciaCm() {
 
 // =================================================================
 void setup() {
-   pinMode(D8,OUTPUT); // Led del sensor ultrasónico
+   pinMode(D1,OUTPUT); // Led del sensor ultrasónico
 
    // ----- Iniciar consola: Herramientas, Monitor serie
    Serial.begin(9600);  
 
    // ----- Inicializacion sensor de distancia
-   int trigPin = D6;
-   int echoPin = D7;
+   int trigPin = D2;
+   int echoPin = D3;
    pinMode(trigPin,OUTPUT);
    pinMode(echoPin,INPUT);
    Serial.println("Iniciando Sensor Distancia");
