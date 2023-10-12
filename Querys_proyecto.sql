@@ -287,5 +287,60 @@ GROUP BY
 ORDER BY
     NombreProyecto, NombreSensor, UbicacionGeografica;
 
+--Insertar un dato nulo
+INSERT INTO Datos (id_Micro, Id_Sen_Act, Fecha, Datos, Unidad)
+VALUES
+    (2, 2, '2023-03-12', NULL , 'Kilopascals');
+--Crear una vista
+CREATE OR REPLACE VIEW ProyectoMicroActSenDato AS
+SELECT
+    P.Nombre AS NombreProyecto,
+    M.Nombre AS NombreMicrocontrolador,
+    SA.Nombre AS NombreSensorActuador,
+    GROUP_CONCAT(D.Datos ORDER BY D.Fecha ASC SEPARATOR ', ') AS DatosRegistrados
+FROM
+    Proyectos P
+JOIN
+    Proyecto_Micro PM ON P.idProyectos = PM.id_Proyectos
+JOIN
+    Microcontroladores M ON PM.Id_Micro = M.idMicrocontroladores
+JOIN
+    Datos D ON M.idMicrocontroladores = D.id_Micro
+JOIN
+    SenAct SA ON D.Id_Sen_Act = SA.idSenAct
+GROUP BY
+    P.Nombre
+ORDER BY
+    NombreProyecto, NombreMicrocontrolador, NombreSensorActuador;
+--Ver los datos de la vista
+SELECT * FROM ProyectoMicroActSenDato;
 
+-- 2.Contar la cantidad de datos por sensor usando la vista de 1 (ESTE ESTA BIEN, PERO NO ES LO QUE PIDE)
 
+SELECT NombreSensorActuador,
+       (CHAR_LENGTH(DatosRegistrados) - CHAR_LENGTH(REPLACE(DatosRegistrados, ',', '')) + 1) AS CantidadDatos
+FROM ProyectoMicroActSenDato;
+
+--Agregar un microcontrolador nuevo
+INSERT INTO Microcontroladores (Nombre, API_Hostname, Tipo_microcontrolador, Ubicacion_geografica, API_puerto)
+VALUES
+    ('ABT 800', 'nanocontrol.local', 'Controlador', 'Sala de servidores 10, Edificio b', 8070);
+
+--Insertar microcontroladores que no se relacionen con un sensor
+INSERT INTO Datos (id_Micro, Fecha, Datos, Unidad)
+VALUES
+    (6, '2023-06-11', 26.9, 'Kilopascals');
+--Contar los registros de microcontroladores sin sensor
+SELECT COUNT(*) AS Microcontroladores_sin_sensores
+FROM Datos
+WHERE Id_Sen_Act = 0;
+
+--creamos SENSOR SIN DATOS
+--Creamos una fila donde los datos del sensor sean nulos
+INSERT INTO Datos (id_Micro, Id_Sen_Act, Datos)
+VALUES
+    (1,1, NULL);
+--Contamos el numero de registros donde los datos sean nulos
+SELECT COUNT(*) AS Registors_sin_datos
+FROM DATOS
+WHERE Datos IS NULL;
