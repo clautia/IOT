@@ -121,7 +121,7 @@ SELECT *
 FROM datos
 WHERE id_Micro IN (2, 5);
 
--- 7.
+-- 7. Consultar la tabla proyecto, microcontrolador sin usar la cláusula JOIN.
 
 SELECT
     P.Nombre AS Proyecto,
