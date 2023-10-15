@@ -123,19 +123,6 @@ WHERE id_Micro IN (2, 5);
 
 -- 7. Consultar la tabla proyecto, microcontrolador sin usar la cláusula JOIN.
 
-SELECT
-    P.Nombre AS Proyecto,
-    M.Nombre AS Microcontrolador
-FROM Proyectos P, Microcontroladores M
-WHERE P.idProyectos IN (
-    SELECT DISTINCT PM.id_Proyectos
-    FROM Proyecto_Micro PM
-    WHERE PM.Id_Micro IN (
-        SELECT MC.idMicrocontroladores
-        FROM Microcontroladores MC
-    )
-);
-
 SELECT 
     P.Nombre AS Proyecto,
     M.Nombre AS Microcontrolador
@@ -145,4 +132,3 @@ WHERE P.idProyectos IN (
     FROM Proyecto_Micro PM
     WHERE PM.Id_Micro = M.idMicrocontroladores
 );
-
