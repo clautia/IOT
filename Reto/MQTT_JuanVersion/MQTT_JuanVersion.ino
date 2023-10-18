@@ -94,6 +94,7 @@ void setup_mqtt() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
+  
   Serial.print("Message arrived ["); 
   Serial.print(topic); 
   Serial.print("] ");
@@ -148,6 +149,7 @@ void reconnect() {
 }
 
 void conectarMQTT() {
+  
   if (!client.connected()) {
     reconnect();
   }
@@ -227,6 +229,7 @@ void medirTemperatura() {
 // Funcion que lee distancia mediante sensor ultrasónico
 
 void medirDistancia() {
+  
   digitalWrite(D6, LOW);
   delayMicroseconds(3);
   digitalWrite(D6, HIGH);
@@ -271,7 +274,9 @@ void setup() {
 
   dht.begin();
 }
+
 void loop() {
+  
   medirTemperatura();
   medirLuz();
   medirDistancia();
