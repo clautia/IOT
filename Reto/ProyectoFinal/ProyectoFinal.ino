@@ -8,10 +8,10 @@ Temperatura - Ventilador / Display
 // Definiciones de pins de NodeMCU 
 
 #define D0 16 // Sensor de temperatura
-#define D1 5 // SCL para display
-#define D2 4 // SDA para display
-#define D3 0 // Ventilador
-#define D4 2 // Buzzer
+#define D1 5 // Buzzer
+#define D2 4 // Ventilador
+#define D3 0 // SCL para display
+#define D4 2 // SDA para display
 
 // Definiciones del sensor de temperatura DHT11
 
