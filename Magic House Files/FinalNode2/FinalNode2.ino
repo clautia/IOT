@@ -146,29 +146,28 @@ void connectMQTT() {
 
 void readDistance(unsigned short int thresold) {
   
-  float dCm = 0; 
+  float distance = 0; 
+  float duration = 0;
 
   digitalWrite(D4, LOW);
-  delayMicroseconds(3);
+  delayMicroseconds(2);
+
   digitalWrite(D4, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(D4,LOW);
+  delayMicroseconds(10);
+  digitalWrite(D4, LOW);
 
-  float v = 331.5+0.6*20;
+  duration = pulseIn(D2, HIGH);
 
-  float tUs = pulseIn(D2, HIGH);  //microseconds
-  float t = tUs / 1000.0 / 1000.0 / 2.0;    
-  float d = t*v;  //m
-  dCm = d*100;  // cm  
-  Serial.print("\n");
-  Serial.print("Distancia(cm): ");
-  Serial.println(dCm);
-  snprintf (sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"dCm\":%5.2f}", dCm);
-  delay(200);
+  distance = duration * 0.034 / 2.0;
 
-  if(dCm > thresold) {
-    digitalWrite(D4, HICH);
+  if(distance > thresold) {
+    digitalWrite(D4, HIGH);
   }
+  else {
+    digitalWrite(D4, LOW);
+  }
+
+  snprintf (sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"d\":%5.2f}", photorresistanceVoltage);
 }
 
 //  Funcion detectora de luz con fotorresistencia
@@ -183,7 +182,7 @@ void readLigth(float threshold) {
   Serial.println(photorresistanceVoltage);
 
   if (photorresistanceVoltage > threshold) {
-    digitalWrite(D3, HIGH)
+    digitalWrite(D3, HIGH);
   }
   else {
     digitalWrite(D3, LOW);
