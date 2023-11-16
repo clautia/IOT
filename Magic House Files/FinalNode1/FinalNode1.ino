@@ -1,4 +1,4 @@
-// Programa para NodeMCU
+// Programa para NodeMCU 1 (Protoboard Blanca)
 
 /* Sensores - Actuadores
 Gas - Buzzer
@@ -8,10 +8,10 @@ Temperatura - Ventilador / Display
 // Definiciones de pins de NodeMCU 
 
 #define D0 16 // Sensor de temperatura
-#define D1 5 // Buzzer
-#define D2 4 // Ventilador
-#define D3 0 // SCL para display
-#define D4 2 // SDA para display
+#define D1 5 // SCL para display
+#define D2 4 // SDA para display
+#define D3 0 // Buzzer
+#define D4 2 // Ventilador
 
 // Definiciones del sensor de temperatura DHT11
 
@@ -36,9 +36,8 @@ const char* mqtt_server = "broker.mqtt-dashboard.com";
 const char* topico_salida_1 = "TopicOutTemperature_Equipo2";
 const char* topico_salida_2 = "TopicOutGas_Equipo2";
 
-char sTopicoOutPhotorresistor[50];
 char sTopicoOutTemperature[50];
-char sTopicoOutDistance[50]; 
+char sTopicoOutGas[50]; 
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -97,17 +96,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
 
   Serial.println();
-
-  digitalWrite(D3, HIGH); 
-  delay(100); 
-  digitalWrite(D3, LOW); // Aviso LED mensaje recibido
-
-  if ((char)payload[0] == '1') { // Aviso LED primer cáracter es 1
-    digitalWrite(D4, HIGH);
-  } 
-  else {
-    digitalWrite(D4, LOW); 
-  }
 }
 
 // Funcion que conecta o reconecta a Broker MQTT
@@ -136,7 +124,7 @@ void reconnect() {
   }
 }
 
-void conectarMQTT() {
+void connectMQTT() {
   
   if (!client.connected()) {
     reconnect();
@@ -161,24 +149,9 @@ void conectarMQTT() {
   }
 }
 
-//  Funcion detectora de gas con el sensor ARD-352
-
-void medirGas() {
-  
-  gasSensorVoltage = analogRead(GAS_SENSOR_PIN);
-
-  Serial.print("Valor de voltaje (Gas): \n");
-  Serial.println(gasSensorVoltage);
-
-  if (gasSensorVoltage > 500)
-    encenderBuzzer();
-
-  snprintf (sTopicoOutGas, MSG_BUFFER_SIZE, "{\"gV\":%d}", gasSensorVoltage);
-}
-
 // Funcion que lee temperatura y humedad con el sensor DHT11
 
-void medirTemperatura() {
+void readTemperatureHumidity() {
   
   delay(2000);
 
@@ -201,16 +174,31 @@ void medirTemperatura() {
   Serial.print("(C) "); Serial.print(hif);
   Serial.print("(F)\n\n");
 
-  digitalWrite(D3, (int) t);
+  digitalWrite(D4, (int) t * 2);
 
   snprintf (sTopicoOutTemperature, MSG_BUFFER_SIZE, "{\"t\":%5.2f,\"h\":%5.2f}", t, h);
 }
 
-void encenderBuzzer() {
+//  Funcion detectora de gas con el sensor ARD-352
 
-    tone(D4, 1000);
+void readGas(float threshold) {
+  
+  gasSensorVoltage = analogRead(GAS_SENSOR_PIN);
+
+  Serial.print("Valor de voltaje (Gas): \n");
+  Serial.println(gasSensorVoltage);
+
+  if (gasSensorVoltage > threshold)
+    turnOnBuzzer(D3);
+
+  snprintf (sTopicoOutGas, MSG_BUFFER_SIZE, "{\"gV\":%5.2f}", gasSensorVoltage);
+}
+
+void turnOnBuzzer(unsigned short int pin) {
+
+    tone(pin, 1000);
     delay(1000);
-    noTone(D4);
+    noTone(pin);
     delay(1000);
 }
 
@@ -232,8 +220,8 @@ void setup() {
 
 void loop() {
   
-  medirTemperatura();
-  medirLuz();
-  medirDistancia();
-  conectarMQTT();
+  readTemperatureHumidity();
+  readGas(100);
+
+  connectMQTT();
 }
