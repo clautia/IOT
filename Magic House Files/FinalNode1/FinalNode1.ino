@@ -7,17 +7,17 @@ Temperatura - Ventilador / Display
 
 // Definiciones de pins de NodeMCU 
 
-#define D0 16 // Sensor de temperatura
 #define D1 5 // SCL para display
 #define D2 4 // SDA para display
 #define D3 0 // Buzzer
 #define D4 2 // Ventilador
+#define D5 14 // Sensor de temperatura
 
 // Definiciones del sensor de temperatura DHT11
 
 #include "DHT.h"
 #define DHT_TYPE DHT11
-DHT dht(D0, DHT_TYPE);
+DHT dht(D5, DHT_TYPE);
 
 // Definiciones del sensor de gas ARD-352
 
@@ -219,7 +219,7 @@ void setup() {
 void loop() {
   
   readTemperatureHumidity();
-  readGas(10);
+  readGas(1);
 
   connectMQTT();
 }
