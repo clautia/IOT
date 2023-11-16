@@ -151,7 +151,7 @@ void connectMQTT() {
 
 // Funcion que lee temperatura y humedad con el sensor DHT11
 
-void readTemperatureHumidity() {
+void readTemperatureHumidity(float thresold) {
   
   delay(2000);
 
@@ -161,16 +161,9 @@ void readTemperatureHumidity() {
   h = dht.readHumidity();
   t = dht.readTemperature();
 
-  if (isnan(h) || isnan(t)) {
-    Serial.print("Falló al leer el sensor DHT\n");
-    return;
+  if(t > thresold) {
+    digitalWrite(D4, HIGH);
   }
-
-  Serial.print("Humedad: "); Serial.print(h);
-  Serial.print(", Temperatura: "); Serial.print(t);
-  Serial.print("(C) ");
-
-  digitalWrite(D4, (int) t * 2);
 
   snprintf (sTopicoOutTemperature, MSG_BUFFER_SIZE, "{\"t\":%5.2f,\"h\":%5.2f}", t, h);
 }
@@ -182,9 +175,6 @@ void readGas(float threshold) {
   gasSensorVoltage = 0;
 
   gasSensorVoltage = analogRead(GAS_SENSOR_PIN);
-
-  Serial.print("Valor de voltaje (Gas): \n");
-  Serial.println(gasSensorVoltage);
 
   if (gasSensorVoltage > threshold)
     turnOnBuzzer(D3);
@@ -218,7 +208,7 @@ void setup() {
 
 void loop() {
   
-  readTemperatureHumidity();
+  readTemperatureHumidity(1);
   readGas(1);
 
   connectMQTT();
