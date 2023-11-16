@@ -204,12 +204,11 @@ void setup() {
 
   Serial.begin(9600);
 
-  pinMode(D0, INPUT); // Pin del sensor de temperatura
-  pinMode(D1, OUTPUT); // Pin SCL para display
-  pinMode(D2, OUTPUT); // Pin SDA para display
-  pinMode(D3, OUTPUT); // Ventilador
-  pinMode(D4, OUTPUT); // Buzzer
-  pinMode(D5, INPUT); // Buzzer
+  pinMode(D1, OUTPUT); // SCL para display
+  pinMode(D2, OUTPUT); // SDA para display
+  pinMode(D3, OUTPUT); // Buzzer
+  pinMode(D4, OUTPUT); // Ventilador
+  pinMode(D5, INPUT); // Sensor de temperatura
 
   setup_wifi();
   setup_mqtt();
