@@ -155,24 +155,20 @@ void readTemperatureHumidity() {
   
   delay(2000);
 
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
-  float f = dht.readTemperature(true);
+  float h = 0;
+  float t = 0;
 
-  if (isnan(h) || isnan(t) || isnan(f)) {
+  h = dht.readHumidity();
+  t = dht.readTemperature();
+
+  if (isnan(h) || isnan(t)) {
     Serial.print("Falló al leer el sensor DHT\n");
     return;
   }
 
-  float hif = dht.computeHeatIndex(f, h);
-  float hic = dht.computeHeatIndex(t, h, false);
-
   Serial.print("Humedad: "); Serial.print(h);
   Serial.print(", Temperatura: "); Serial.print(t);
-  Serial.print("(C) "); Serial.print(f);
-  Serial.print("(F), Indice de calor: "); Serial.print(hic);
-  Serial.print("(C) "); Serial.print(hif);
-  Serial.print("(F)\n\n");
+  Serial.print("(C) ");
 
   digitalWrite(D4, (int) t * 2);
 
@@ -183,6 +179,8 @@ void readTemperatureHumidity() {
 
 void readGas(float threshold) {
   
+  gasSensorVoltage = 0;
+
   gasSensorVoltage = analogRead(GAS_SENSOR_PIN);
 
   Serial.print("Valor de voltaje (Gas): \n");
@@ -191,7 +189,7 @@ void readGas(float threshold) {
   if (gasSensorVoltage > threshold)
     turnOnBuzzer(D3);
 
-  snprintf (sTopicoOutGas, MSG_BUFFER_SIZE, "{\"gV\":%5.2f}", gasSensorVoltage);
+  snprintf (sTopicoOutGas, MSG_BUFFER_SIZE, "{\"gV\":%d}", gasSensorVoltage);
 }
 
 void turnOnBuzzer(unsigned short int pin) {
@@ -221,7 +219,7 @@ void setup() {
 void loop() {
   
   readTemperatureHumidity();
-  readGas(100);
+  readGas(10);
 
   connectMQTT();
 }
