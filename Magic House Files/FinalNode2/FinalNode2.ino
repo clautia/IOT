@@ -5,20 +5,12 @@ Ultrasonico - Servo
 Fotorresistencia - LED
  */
 
-#include <NewPing.h>
-
 // Definiciones de pins de NodeMCU 
 
-#define D0 16 // Trigger de ultrasonico
 #define D1 5 // Servo
 #define D2 4 // Echo de ultrasonico
 #define D3 0 // LED
-
-// Definición de ultrasónico
-
-#define MAX_DISTANCE 40
-
-NewPing sonar(DO, D2, MAX_DISTANCE);
+#define D4 2 // Trigger de ultrasonico
 
 // Definiciones de fotorresistencia
 
@@ -153,49 +145,66 @@ void connectMQTT() {
 // Función medidora de distancia con ultrasónico
 
 void readDistance(unsigned short int thresold) {
+  
+  float dCm = 0; 
 
-  delay(50);
+  digitalWrite(D4, LOW);
+  delayMicroseconds(3);
+  digitalWrite(D4, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(D4,LOW);
 
-  float distance = sonar.ping_cm();
+  float v = 331.5+0.6*20;
 
-  if(distance > thresold) {
-    digitalWrite(D1, 100);
+  float tUs = pulseIn(D2, HIGH);  //microseconds
+  float t = tUs / 1000.0 / 1000.0 / 2.0;    
+  float d = t*v;  //m
+  dCm = d*100;  // cm  
+  Serial.print("\n");
+  Serial.print("Distancia(cm): ");
+  Serial.println(dCm);
+  snprintf (sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"dCm\":%5.2f}", dCm);
+  delay(200);
+
+  if(dCm > thresold) {
+    digitalWrite(D4, HICH);
   }
-
-  snprintf (sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"d\":%5.2f}", distance);
-
 }
 
 //  Funcion detectora de luz con fotorresistencia
 
 void readLigth(float threshold) {
+
+  photorresistanceVoltage = 0;
   
   photorresistanceVoltage = analogRead(PHOTORRESISTANCE_PIN);
 
-  Serial.print("Valor de voltaje (Gas): \n");
+  Serial.print("Valor de voltaje (Luz): \n");
   Serial.println(photorresistanceVoltage);
 
-  if (photorresistanceVoltage > threshold)
-    digitalWrite(D3, HIGH);
+  if (photorresistanceVoltage > threshold) {
+    digitalWrite(D3, HIGH)
+  }
+  else {
+    digitalWrite(D3, LOW);
+  }
 
-  snprintf (sTopicoOutLigth, MSG_BUFFER_SIZE, "{\"lV\":%5.2f}", photorresistanceVoltage);
+  snprintf (sTopicoOutLigth, MSG_BUFFER_SIZE, "{\"lV\":%d}", photorresistanceVoltage);
 }
 
 // Funcion que lee temperatura y humedad con el sensor DHT11
 
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(9600);
 
-  pinMode(D0, OUTPUT); // Trigger de ultrasonico
   pinMode(D1, OUTPUT); // Servo
   pinMode(D2, INPUT); // Echo de ultrasonico
   pinMode(D3, OUTPUT); // LED
+  pinMode(D4, OUTPUT); // Trigger de ultrasonico
 
   setup_wifi();
   setup_mqtt();
-
-  dht.begin();
 }
 
 void loop() {
