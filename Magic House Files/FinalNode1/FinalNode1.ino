@@ -209,6 +209,7 @@ void setup() {
   pinMode(D2, OUTPUT); // Pin SDA para display
   pinMode(D3, OUTPUT); // Ventilador
   pinMode(D4, OUTPUT); // Buzzer
+  pinMode(D5, INPUT); // Buzzer
 
   setup_wifi();
   setup_mqtt();
