@@ -146,6 +146,8 @@ void connectMQTT() {
 
 void readDistance(unsigned short int thresold) {
   
+  delay(2000);
+
   float distance = 0; 
   float duration = 0;
 
@@ -158,7 +160,7 @@ void readDistance(unsigned short int thresold) {
 
   duration = pulseIn(D2, HIGH);
 
-  distance = duration * 0.034 / 2.0;
+  distance = duration * 0.034 / 2;
 
   if(distance > thresold) {
     digitalWrite(D4, HIGH);
@@ -167,7 +169,7 @@ void readDistance(unsigned short int thresold) {
     digitalWrite(D4, LOW);
   }
 
-  snprintf (sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"d\":%5.2f}", photorresistanceVoltage);
+  snprintf (sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"d\":%5.2f}", distance);
 }
 
 //  Funcion detectora de luz con fotorresistencia
