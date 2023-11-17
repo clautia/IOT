@@ -161,6 +161,10 @@ void readTemperatureHumidity(float thresold) {
   h = dht.readHumidity();
   t = dht.readTemperature();
 
+  if (isnan(h) || isnan(t)) {
+    return;
+  }
+
   if(t > thresold) {
     digitalWrite(D4, HIGH);
   }
@@ -200,16 +204,24 @@ void setup() {
   pinMode(D4, OUTPUT); // Ventilador
   pinMode(D5, INPUT); // Sensor de temperatura
 
-  setup_wifi();
+/*   setup_wifi();
   setup_mqtt();
 
-  dht.begin();
+  dht.begin(); */
 }
 
 void loop() {
   
-  readTemperatureHumidity(1);
+/*   readTemperatureHumidity(1);
   readGas(1);
 
-  connectMQTT();
+  connectMQTT(); */
+
+  digitalWrite(D4, HIGH);
+
+  delay(5000);
+1
+  digitalWrite(D4, LOW);
+
+  delay(10000);
 }

@@ -5,17 +5,20 @@ Ultrasonico - Servo
 Fotorresistencia - LED
  */
 
+#include <Servo.h>
+
+Servo servo;
+
 // Definiciones de pins de NodeMCU 
 
-#define D1 5 // Servo
-#define D2 4 // Echo de ultrasonico
-#define D3 0 // LED
-#define D4 2 // Trigger de ultrasonico
+#define D1 5 // Echo de ultrasonico
+#define D2 4 // Trigger de ultrasonico
+#define D5 14 // Servo
+#define D6 12 // LED
 
 // Definiciones de fotorresistencia
 
 const int PHOTORRESISTANCE_PIN = A0;
-int photorresistanceVoltage = -1;
 
 // Definiciones de ESP8266MQTT
 
@@ -144,52 +147,71 @@ void connectMQTT() {
 
 // Función medidora de distancia con ultrasónico
 
-void readDistance(unsigned short int thresold) {
+void readDistance(unsigned short int echo, unsigned short int trigger, unsigned short int actuatorPin, float thresoldDistance, unsigned int durationThresold = 15000) {
   
-  delay(2000);
+  delay(500);
 
   float distance = 0; 
   float duration = 0;
 
-  digitalWrite(D4, LOW);
+  digitalWrite(trigger, LOW);
   delayMicroseconds(2);
-
-  digitalWrite(D4, HIGH);
+  digitalWrite(trigger, HIGH);
   delayMicroseconds(10);
-  digitalWrite(D4, LOW);
+  digitalWrite(trigger, LOW);
 
-  duration = pulseIn(D2, HIGH);
-
+  duration = pulseIn(echo, HIGH);
   distance = duration * 0.034 / 2;
 
-  if(distance > thresold) {
-    digitalWrite(D4, HIGH);
+  static unsigned long startTime = 0;
+  unsigned long elapsedTime = 0;
+  
+  if(distance > thresoldDistance) {
+
+    if(startTime = 0) {
+
+      startTime = millis();
+    } else {
+
+      elapsedTime = millis() - startTime;
+
+      if(elapsedTime >= durationThresold) {
+          
+          Serial.println("a");
+          servo.write(90);
+      }
+    }
   }
   else {
-    digitalWrite(D4, LOW);
+
+    startTime = 0;
+    servo.write(0);
   }
+
+  Serial.print("Distance: ");
+Serial.println(distance);
+Serial.print("StartTime: ");
+Serial.println(startTime);
+Serial.print("ElapsedTime: ");
+Serial.println(elapsedTime);
+
 
   snprintf (sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"d\":%5.2f}", distance);
 }
 
 //  Funcion detectora de luz con fotorresistencia
 
-void readLigth(float threshold) {
+void readLigth(unsigned short int photorresistancePin, unsigned short int actuatorPin) {
 
-  photorresistanceVoltage = 0;
+  delay(500);
+
+  unsigned short int photorresistanceVoltage = 0;
+  unsigned short int brightness = 0;
   
-  photorresistanceVoltage = analogRead(PHOTORRESISTANCE_PIN);
+  photorresistanceVoltage = analogRead(photorresistancePin);
+  brightness = map(photorresistanceVoltage, 75, 1024, 255, 0);
 
-  Serial.print("Valor de voltaje (Luz): \n");
-  Serial.println(photorresistanceVoltage);
-
-  if (photorresistanceVoltage > threshold) {
-    digitalWrite(D3, HIGH);
-  }
-  else {
-    digitalWrite(D3, LOW);
-  }
-
+  analogWrite(actuatorPin, brightness);
   snprintf (sTopicoOutLigth, MSG_BUFFER_SIZE, "{\"lV\":%d}", photorresistanceVoltage);
 }
 
@@ -199,10 +221,12 @@ void setup() {
 
   Serial.begin(9600);
 
-  pinMode(D1, OUTPUT); // Servo
-  pinMode(D2, INPUT); // Echo de ultrasonico
-  pinMode(D3, OUTPUT); // LED
-  pinMode(D4, OUTPUT); // Trigger de ultrasonico
+  pinMode(D1, INPUT); // Echo del ultrasonico
+  pinMode(D2, OUTPUT); // Trigger de ultrasonico
+  pinMode(D5, OUTPUT); // Servo
+  pinMode(D6, OUTPUT); // LED
+
+  servo.attach(D5);
 
   setup_wifi();
   setup_mqtt();
@@ -210,8 +234,8 @@ void setup() {
 
 void loop() {
   
-  readDistance(100);
-  readLigth(100);
+  readDistance(D1, D2, D5, 20, 2000);
+  readLigth(PHOTORRESISTANCE_PIN, D6);
 
   connectMQTT();
 }
