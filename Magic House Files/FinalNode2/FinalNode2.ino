@@ -149,7 +149,7 @@ void connectMQTT() {
 
 void readDistance(unsigned short int echo, unsigned short int trigger, unsigned short int actuatorPin, float thresoldDistance, unsigned int durationThresold = 15000) {
   
-  delay(500);
+  delay(1000);
 
   float distance = 0; 
   float duration = 0;
@@ -185,7 +185,6 @@ void readDistance(unsigned short int echo, unsigned short int trigger, unsigned 
   else {
 
     startTime = 0;
-    servo.write(0);
   }
 
   Serial.print("Distance: ");
@@ -202,7 +201,7 @@ void readDistance(unsigned short int echo, unsigned short int trigger, unsigned 
 
 void readLigth(unsigned short int photorresistancePin, unsigned short int actuatorPin) {
 
-  delay(500);
+  delay(1000);
 
   unsigned short int photorresistanceVoltage = 0;
   unsigned short int brightness = 0;
