@@ -153,7 +153,7 @@ void connectMQTT() {
 
 void readTemperatureHumidity(float thresold) {
   
-  delay(2000);
+  delay(1000);
 
   float h = 0;
   float t = 0;
@@ -168,30 +168,46 @@ void readTemperatureHumidity(float thresold) {
   if(t > thresold) {
     digitalWrite(D4, HIGH);
   }
+  else {
+    digitalWrite(D4, LOW);
+  }
 
+/*   For debugging
+  Serial.print("T: ");
+  Serial.println(t); */
+  
   snprintf (sTopicoOutTemperature, MSG_BUFFER_SIZE, "{\"t\":%5.2f,\"h\":%5.2f}", t, h);
 }
 
 //  Funcion detectora de gas con el sensor ARD-352
 
 void readGas(float threshold) {
+
+  delay(1000);
   
   gasSensorVoltage = 0;
 
   gasSensorVoltage = analogRead(GAS_SENSOR_PIN);
 
-  if (gasSensorVoltage > threshold)
-    turnOnBuzzer(D3);
+  if(gasSensorVoltage > threshold) {
+    turnOnBuzzer(D3, 3, 4000, 150, 200);
+  }
+
+/*   For debugging
+  Serial.print("G: ");
+  Serial.println(gasSensorVoltage); */
 
   snprintf (sTopicoOutGas, MSG_BUFFER_SIZE, "{\"gV\":%d}", gasSensorVoltage);
 }
 
-void turnOnBuzzer(unsigned short int pin) {
+void turnOnBuzzer(unsigned short int pin, unsigned short int beeps, unsigned short int frequency, unsigned short int duration, unsigned short int delayTime) {
 
-    tone(pin, 1000);
-    delay(1000);
+  for(unsigned short int i = 0; i < beeps; i++) {
+    tone(pin, frequency, duration);
+    delay(delayTime);
     noTone(pin);
-    delay(1000);
+    delay(delayTime);
+  }
 }
 
 void setup() {
@@ -204,24 +220,16 @@ void setup() {
   pinMode(D4, OUTPUT); // Ventilador
   pinMode(D5, INPUT); // Sensor de temperatura
 
-/*   setup_wifi();
+  setup_wifi();
   setup_mqtt();
 
-  dht.begin(); */
+  dht.begin();
 }
 
 void loop() {
   
-/*   readTemperatureHumidity(1);
-  readGas(1);
+  readTemperatureHumidity(25);
+  readGas(310);
 
-  connectMQTT(); */
-
-  digitalWrite(D4, HIGH);
-
-  delay(5000);
-1
-  digitalWrite(D4, LOW);
-
-  delay(10000);
+  connectMQTT();
 }
