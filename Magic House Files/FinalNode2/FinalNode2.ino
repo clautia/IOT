@@ -189,14 +189,13 @@ void readDistance(unsigned short int echo, unsigned short int trigger, unsigned 
   }
 
   Serial.print("Distance: ");
-Serial.println(distance);
-Serial.print("StartTime: ");
-Serial.println(startTime);
-Serial.print("ElapsedTime: ");
-Serial.println(elapsedTime);
+  Serial.println(distance);
+  Serial.print("StartTime: ");
+  Serial.println(startTime);
+  Serial.print("ElapsedTime: ");
+  Serial.println(elapsedTime);
 
-
-  snprintf (sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"d\":%5.2f}", distance);
+  //snprintf (sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"d\":%5.2f}", distance);
 }
 
 //  Funcion detectora de luz con fotorresistencia
@@ -209,10 +208,14 @@ void readLigth(unsigned short int photorresistancePin, unsigned short int actuat
   unsigned short int brightness = 0;
   
   photorresistanceVoltage = analogRead(photorresistancePin);
-  brightness = map(photorresistanceVoltage, 75, 1024, 255, 0);
+  brightness = map(photorresistanceVoltage, 45, 1024, 255, 0);
 
   analogWrite(actuatorPin, brightness);
-  snprintf (sTopicoOutLigth, MSG_BUFFER_SIZE, "{\"lV\":%d}", photorresistanceVoltage);
+  
+  Serial.print("Luz: ");
+  Serial.println(photorresistanceVoltage);
+
+  //snprintf (sTopicoOutLigth, MSG_BUFFER_SIZE, "{\"lV\":%d}", photorresistanceVoltage);
 }
 
 // Funcion que lee temperatura y humedad con el sensor DHT11
@@ -228,8 +231,8 @@ void setup() {
 
   servo.attach(D5);
 
-  setup_wifi();
-  setup_mqtt();
+  //setup_wifi();
+  //setup_mqtt();
 }
 
 void loop() {
@@ -237,5 +240,5 @@ void loop() {
   readDistance(D1, D2, D5, 20, 2000);
   readLigth(PHOTORRESISTANCE_PIN, D6);
 
-  connectMQTT();
+  //connectMQTT();
 }
