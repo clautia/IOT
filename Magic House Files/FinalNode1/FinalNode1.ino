@@ -7,8 +7,6 @@ Temperatura - Ventilador / Display
 
 // Definiciones de pins de NodeMCU 
 
-#define D1 5 // SCL para display
-#define D2 4 // SDA para display
 #define D3 0 // Buzzer
 #define D4 2 // Ventilador
 #define D5 14 // Sensor de temperatura
@@ -35,9 +33,11 @@ const char* mqtt_server = "broker.mqtt-dashboard.com";
 
 const char* topico_salida_1 = "TopicOutTemperature_Equipo2";
 const char* topico_salida_2 = "TopicOutGas_Equipo2";
+const char* topico_salida_3 = "TopicOutHumidity_Equipo2";
 
 char sTopicoOutTemperature[50];
 char sTopicoOutGas[50]; 
+char sTopicoOutHumidity[50]; 
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -113,6 +113,7 @@ void reconnect() {
 
       client.subscribe(topico_salida_1);
       client.subscribe(topico_salida_2);
+      client.subscribe(topico_salida_3);
     } 
     else {
       Serial.print("failed, rc="); 
@@ -146,6 +147,9 @@ void connectMQTT() {
 
     Serial.println(sTopicoOutGas);
     client.publish(topico_salida_2, sTopicoOutGas);
+
+    Serial.println(sTopicoOutHumidity);
+    client.publish(topico_salida_3, sTopicoOutHumidity);
   }
 }
 
@@ -176,7 +180,8 @@ void readTemperatureHumidity(float thresold) {
   Serial.print("T: ");
   Serial.println(t); */
   
-  snprintf (sTopicoOutTemperature, MSG_BUFFER_SIZE, "{\"t\":%5.2f,\"h\":%5.2f}", t, h);
+  snprintf(sTopicoOutTemperature, MSG_BUFFER_SIZE, "{\"type\":\"temperatura\",\"value\":%5.2f}", t);
+  snprintf(sTopicoOutHumidity, MSG_BUFFER_SIZE, "{\"type\":\"humedad\",\"value\":%5.2f}", h);
 }
 
 //  Funcion detectora de gas con el sensor ARD-352
@@ -197,7 +202,8 @@ void readGas(float threshold) {
   Serial.print("G: ");
   Serial.println(gasSensorVoltage); */
 
-  snprintf (sTopicoOutGas, MSG_BUFFER_SIZE, "{\"gV\":%d}", gasSensorVoltage);
+  snprintf(sTopicoOutGas, MSG_BUFFER_SIZE, "{\"type\":\"gas\",\"value\":%d}", gasSensorVoltage);
+
 }
 
 void turnOnBuzzer(unsigned short int pin, unsigned short int beeps, unsigned short int frequency, unsigned short int duration, unsigned short int delayTime) {
@@ -214,8 +220,6 @@ void setup() {
 
   Serial.begin(9600);
 
-  pinMode(D1, OUTPUT); // SCL para display
-  pinMode(D2, OUTPUT); // SDA para display
   pinMode(D3, OUTPUT); // Buzzer
   pinMode(D4, OUTPUT); // Ventilador
   pinMode(D5, INPUT); // Sensor de temperatura
@@ -228,8 +232,8 @@ void setup() {
 
 void loop() {
   
-  readTemperatureHumidity(25);
-  readGas(310);
+  readTemperatureHumidity(22);
+  readGas(360);
 
   connectMQTT();
 }

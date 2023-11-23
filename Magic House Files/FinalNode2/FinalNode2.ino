@@ -31,9 +31,11 @@ const char* mqtt_server = "broker.mqtt-dashboard.com";
 
 const char* topico_salida_1 = "TopicOutDistance_Equipo2";
 const char* topico_salida_2 = "TopicOutLigth_Equipo2";
+const char* topico_salida_3 = "TopicOutIsDoorOpen_Equipo2";
 
 char sTopicoOutDistance[50];
 char sTopicoOutLigth[50];
+char sTopicoOutIsDoorOpen[50];
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -109,6 +111,7 @@ void reconnect() {
 
       client.subscribe(topico_salida_1);
       client.subscribe(topico_salida_2);
+      client.subscribe(topico_salida_3);
     } 
     else {
       Serial.print("failed, rc="); 
@@ -142,6 +145,9 @@ void connectMQTT() {
 
     Serial.println(sTopicoOutLigth);
     client.publish(topico_salida_2, sTopicoOutLigth);
+
+    Serial.println(sTopicoOutIsDoorOpen);
+    client.publish(topico_salida_3, sTopicoOutIsDoorOpen);
   }
 }
 
@@ -153,6 +159,7 @@ void readDistance(unsigned short int echo, unsigned short int trigger, unsigned 
 
   float distance = 0; 
   float duration = 0;
+  bool isDoorOpen = false;
 
   digitalWrite(trigger, LOW);
   delayMicroseconds(2);
@@ -168,6 +175,8 @@ void readDistance(unsigned short int echo, unsigned short int trigger, unsigned 
   
   if(distance > thresoldDistance) {
 
+    isDoorOpen = true;
+    
     if(startTime = 0) {
 
       startTime = millis();
@@ -177,24 +186,18 @@ void readDistance(unsigned short int echo, unsigned short int trigger, unsigned 
 
       if(elapsedTime >= durationThresold) {
           
-          Serial.println("a");
           servo.write(90);
       }
     }
   }
   else {
-
+    isDoorOpen = false;
+    servo.write(0);
     startTime = 0;
   }
 
-  Serial.print("Distance: ");
-  Serial.println(distance);
-  Serial.print("StartTime: ");
-  Serial.println(startTime);
-  Serial.print("ElapsedTime: ");
-  Serial.println(elapsedTime);
-
-  //snprintf (sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"d\":%5.2f}", distance);
+  snprintf(sTopicoOutIsDoorOpen, MSG_BUFFER_SIZE, "{\"type\":\"puertaAbierta\",\"value\":%d}", isDoorOpen);
+  snprintf(sTopicoOutDistance, MSG_BUFFER_SIZE, "{\"type\":\"distance\",\"value\":%5.2f}", distance);
 }
 
 //  Funcion detectora de luz con fotorresistencia
@@ -210,11 +213,8 @@ void readLigth(unsigned short int photorresistancePin, unsigned short int actuat
   brightness = map(photorresistanceVoltage, 45, 1024, 255, 0);
 
   analogWrite(actuatorPin, brightness);
-  
-  Serial.print("Luz: ");
-  Serial.println(photorresistanceVoltage);
 
-  //snprintf (sTopicoOutLigth, MSG_BUFFER_SIZE, "{\"lV\":%d}", photorresistanceVoltage);
+  snprintf(sTopicoOutLigth, MSG_BUFFER_SIZE, "{\"type\":\"luz\",\"value\":%d}", photorresistanceVoltage);
 }
 
 // Funcion que lee temperatura y humedad con el sensor DHT11
@@ -230,14 +230,14 @@ void setup() {
 
   servo.attach(D5);
 
-  //setup_wifi();
-  //setup_mqtt();
+  setup_wifi();
+  setup_mqtt();
 }
 
 void loop() {
-  
-  readDistance(D1, D2, D5, 20, 2000);
+
+  readDistance(D1, D2, D5, 17, 2000);
   readLigth(PHOTORRESISTANCE_PIN, D6);
 
-  //connectMQTT();
+  connectMQTT();
 }
